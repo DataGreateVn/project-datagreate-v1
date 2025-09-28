@@ -6,16 +6,12 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\System\SettingController;
 
 Route::middleware('guest:admin')->group(function () {
-    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [LoginController::class, 'auth.login']);
+    Route::get('login',  [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('login', [LoginController::class, 'login'])->name('login.post');
 });
 
 Route::middleware('auth:admin')->group(function () {
-    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-    Route::get('/', [DashboardController::class, '__invoke'])->name('dashboard');
-
-    Route::middleware('can:manage-settings')->group(function () {
-        Route::resource('settings', SettingController::class)->except(['show']);
-        Route::post('settings/cache/clear', [SettingController::class, 'clearCache'])->name('settings.clear');
-    });
+    Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
+    Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+    Route::get('/',       [DashboardController::class, 'index'])->name('dashboard');
 });

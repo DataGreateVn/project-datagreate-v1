@@ -38,6 +38,7 @@ return [
     'guards' => [
         'web'   => ['driver' => 'session', 'provider' => 'users'],
         'admin' => ['driver' => 'session', 'provider' => 'admins'], // session guard cho admin
+        // 'admin_api' => ['driver' => 'sanctum', 'provider' => 'admins'], // nếu có API
     ],
 
     /*

@@ -9,7 +9,7 @@
 </head>
 
 <body class="min-h-screen flex items-center justify-center bg-gray-100">
-    <form method="POST" action="{{ route('admin.login') }}" class="bg-white p-6 rounded shadow w-full max-w-sm">
+    <form method="POST" action="{{ route('admin.login.post') }}" class="bg-white p-6 rounded shadow w-full max-w-sm">
         @csrf
         <h1 class="text-xl font-semibold mb-4">Đăng nhập Admin</h1>
         @if ($errors->any())
