@@ -12,6 +12,14 @@ Route::middleware('guest:admin')->group(function () {
 
 Route::middleware('auth:admin')->group(function () {
     Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
+    // Settings CRUD + clear cache
+    Route::resource('settings', SettingController::class)
+        ->except(['show'])         // index, create, store, edit, update, destroy
+        ->names('settings');       // => admin.settings.*
+
+    Route::post('settings/clear', [SettingController::class, 'clearCache'])
+        ->name('settings.clear');  // => admin.settings.clear
+
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
     Route::get('/',       [DashboardController::class, 'index'])->name('dashboard');
 });
