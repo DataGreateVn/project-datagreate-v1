@@ -7,18 +7,24 @@ use Illuminate\Database\Eloquent\Model;
 class Setting extends Model
 {
     protected $fillable = ['name', 'val'];
-    protected $casts = ['val' => 'array']; // nếu val là JSON
+    protected $casts = ['val' => 'json'];
 
-    // ---- Helpers ----
-    public static function set(string $key, mixed $value): void
+    public function setValAttribute($value): void
     {
-        static::updateOrCreate(['name' => $key], ['val' => $value]);
-    }
-
-    public static function setMany(array $pairs): void
-    {
-        foreach ($pairs as $key => $value) {
-            static::set($key, $value);
+        if ($value === null || (is_string($value) && trim($value) === '')) {
+            $this->attributes['val'] = null;
+            return;
         }
+        if (is_string($value)) {
+            $trim = trim($value);
+            $decoded = json_decode($trim, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $this->attributes['val'] = json_encode($decoded, JSON_UNESCAPED_UNICODE);
+                return;
+            }
+            $this->attributes['val'] = json_encode($value, JSON_UNESCAPED_UNICODE);
+            return;
+        }
+        $this->attributes['val'] = json_encode($value, JSON_UNESCAPED_UNICODE);
     }
 }
