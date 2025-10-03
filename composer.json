@@ -9,6 +9,7 @@
     ],
     "license": "MIT",
     "require": {
+        "darkaonline/l5-swagger": "^9.0",
         "guzzlehttp/guzzle": "^7.10",
         "knuckleswtf/scribe": "^5.3",
         "laravel/framework": "^11.0",
@@ -17,7 +18,8 @@
         "predis/predis": "^3.2",
         "spatie/laravel-permission": "^6.21",
         "spatie/laravel-sitemap": "^7.3",
-        "spatie/schema-org": "^3.0"
+        "spatie/schema-org": "^3.0",
+        "zircote/swagger-php": "^5.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -42,6 +44,7 @@
         }
     },
     "scripts": {
+        "swagger": "php artisan l5-swagger:generate",
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

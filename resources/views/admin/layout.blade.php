@@ -36,6 +36,14 @@
                     Settings
                 </a>
 
+                <a href="{{ route('admin.translations.index') }}"
+                    class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 {{ request()->routeIs('admin.settings.*') ? 'bg-slate-100 font-medium' : '' }}">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 3l1.5 2.6 3-.2-.9 2.9 2.3 2-2.3 2 .9 2.9-3-.2L12 21l-1.5-2.6-3 .2.9-2.9-2.3-2 2.3-2-.9-2.9 3 .2L12 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+                    </svg>
+                    Translations
+                </a>
+
                 {{-- Thêm các mục khác nếu cần --}}
             </nav>
 
