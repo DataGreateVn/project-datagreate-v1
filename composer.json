@@ -9,12 +9,13 @@
     ],
     "license": "MIT",
     "require": {
-        "darkaonline/l5-swagger": "^9.0",
+        "blade-ui-kit/blade-heroicons": "^2.6",
         "guzzlehttp/guzzle": "^7.10",
         "knuckleswtf/scribe": "^5.3",
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.2",
         "laravel/tinker": "^2.10",
+        "livewire/livewire": "^3.6",
         "predis/predis": "^3.2",
         "spatie/laravel-permission": "^6.21",
         "spatie/laravel-sitemap": "^7.3",
@@ -36,7 +37,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/Support/Helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
