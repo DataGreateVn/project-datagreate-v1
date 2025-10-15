@@ -123,4 +123,13 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'brand' => [
+        'name'      => env('APP_BRAND_NAME', 'SIP N SOURCE'),
+        'logo'      => env('APP_BRAND_LOGO', 'images/logo.svg'),
+        'colors'    => [
+            'primary' => env('APP_BRAND_PRIMARY', '#ff8a00'),
+            'dark'    => env('APP_BRAND_DARK', '#0f0f0f'),
+        ],
+        'languages' => ['vi', 'en'],
+    ],
 ];
