@@ -21,7 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Alias cần thiết
+        // Đăng ký alias (cái bạn đang có)
         $middleware->alias([
             'auth'  => \App\Http\Middleware\Authenticate::class,
             'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
@@ -30,6 +30,14 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \Spatie\Permission\Middlewares\PermissionMiddleware::class,
             'roles_or_permissions' => \Spatie\Permission\Middlewares\RoleOrPermissionMiddleware::class,
         ]);
+
+        // ✅ Thêm SetLocale vào NHÓM web (chạy cho tất cả route web + /admin)
+        $middleware->appendToGroup('web', [
+            \App\Http\Middleware\SetLocale::class,
+        ]);
+
+        // (Nếu muốn chạy cho tất cả request, kể cả api) dùng:
+        // $middleware->use([\App\Http\Middleware\SetLocale::class]);
     })
     ->withExceptions(function (Exceptions $exceptions) {})
     ->create();

@@ -3,19 +3,26 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Str;
 
 class SetLocale
 {
-    public function handle(Request $request, Closure $next)
+    public function handle($request, Closure $next)
     {
-        $locale = $request->query('lang')
-            ?? $request->header('X-Locale')
-            ?? app()->getLocale();
+        $lang = $request->query('lang');
 
-        if (is_string($locale) && preg_match('/^[a-zA-Z_-]{2,5}$/', $locale)) {
-            app()->setLocale($locale);
+        if ($lang && in_array($lang, ['vi', 'en'])) {
+            session(['locale' => $lang]);
+            cookie()->queue(cookie('locale', $lang, 60 * 24 * 30)); // 30 ngày
         }
+
+        $locale = session('locale') ?: ($request->cookie('locale') ?: config('app.locale', 'vi'));
+        if (! in_array($locale, ['vi', 'en'])) {
+            $locale = 'vi';
+        }
+
+        app()->setLocale($locale);
 
         return $next($request);
     }

@@ -1,30 +1,31 @@
 <?php
-
+// config/admin_settings_groups.php (hoặc nơi bạn đang trả ra mảng này)
 return [
     'default' => 'general',
 
     'groups' => [
         [
-            'label' => 'Cài đặt thông tin',
+            // dùng key dịch thay vì text
+            'label_key' => 'admin.settings.group.info', // 'Cài đặt thông tin'
             'items' => [
-                ['slug' => 'general',   'label' => 'Thông tin chung'],
-                ['slug' => 'meta',      'label' => 'Meta'],
-                ['slug' => 'robots',    'label' => 'Robots.txt'],
-                ['slug' => 'redirects', 'label' => 'Redirects'],
-                ['slug' => 'env',       'label' => 'Tuỳ chỉnh biến môi trường'],
+                ['slug' => 'general',   'label_key' => 'admin.settings.sidebar.general'],
+                ['slug' => 'meta',      'label_key' => 'admin.settings.sidebar.meta'],
+                ['slug' => 'robots',    'label_key' => 'admin.settings.sidebar.robots'],
+                ['slug' => 'redirects', 'label_key' => 'admin.settings.sidebar.redirects'],
+                ['slug' => 'env',       'label_key' => 'admin.settings.sidebar.env'],
             ],
         ],
         [
-            'label' => 'Email',
+            'label_key' => 'admin.settings.group.email', // 'Email'
             'items' => [
-                ['slug' => 'smtp',          'label' => 'Cấu hình SMTP'],
-                ['slug' => 'notifications', 'label' => 'Thông báo'],
+                ['slug' => 'smtp',          'label_key' => 'admin.settings.sidebar.smtp'],
+                ['slug' => 'notifications', 'label_key' => 'admin.settings.sidebar.notifications'],
             ],
         ],
         [
-            'label' => 'Nội dung',
+            'label_key' => 'admin.settings.group.content', // 'Nội dung'
             'items' => [
-                ['slug' => 'translations', 'label' => 'Translations (i18n)'],
+                ['slug' => 'translations', 'label_key' => 'admin.settings.sidebar.translations'],
             ],
         ],
     ],
