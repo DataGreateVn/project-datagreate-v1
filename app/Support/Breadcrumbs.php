@@ -12,24 +12,22 @@ class Breadcrumbs
         $current = Route::current();
         if (!$current) return [];
 
-        $name   = $current->getName();           // ví dụ: admin.settings.index
-        $parts  = $name ? explode('.', $name) : [];
-        // Cấu trúc mong đợi: [admin, module, action]
+        $name  = $current->getName();           // ví dụ: admin.settings.section.general
+        $parts = $name ? explode('.', $name) : [];
+
+        // Cấu trúc mong đợi: [admin, module, action, ...]
         $module = $parts[1] ?? null;
         $action = $parts[2] ?? null;
 
-        // Map label cho module
-        $labels = [
-            'dashboard'    => 'Dashboard',
-            'settings'     => 'Settings',
-            'translations' => 'Translations',
-        ];
+        // Nạp label module từ file riêng
+        /** @var array<string,string> $labels */
+        $labels = require base_path('app/Support/breadcrumb_labels.php');
 
         $items = [];
 
-        // 1) Home (Dashboard) luôn đứng đầu
+        // 1) Home (Dashboard)
         $items[] = [
-            'label' => 'Home',
+            'label' => \t('admin.breadcrumbs.home', 'Home'),
             'url'   => route('admin.dashboard'),
         ];
 
@@ -42,14 +40,30 @@ class Breadcrumbs
             ];
         }
 
-        // 3) Action (create/edit) → chữ cuối, không link
+        // 3) Action hoặc Section (không link)
         if ($action && $action !== 'index') {
-            $suffix = match ($action) {
-                'create' => 'Create',
-                'edit'   => 'Edit',
-                default  => Str::title($action),
-            };
-            $items[] = ['label' => $suffix, 'url' => null];
+            if ($action === 'section') {
+                // Dạng: admin.settings.section.{slug}
+                $slug = $parts[3] ?? null;
+                if ($slug) {
+                    $items[] = [
+                        'label' => \t("admin.settings.section.$slug", Str::title($slug)),
+                        'url'   => null,
+                    ];
+                } else {
+                    $items[] = [
+                        'label' => \t('admin.breadcrumbs.section', 'Section'),
+                        'url'   => null,
+                    ];
+                }
+            } else {
+                $suffix = match ($action) {
+                    'create' => \t('admin.breadcrumbs.create', 'Create'),
+                    'edit'   => \t('admin.breadcrumbs.edit', 'Edit'),
+                    default  => Str::title($action),
+                };
+                $items[] = ['label' => $suffix, 'url' => null];
+            }
         }
 
         return $items;

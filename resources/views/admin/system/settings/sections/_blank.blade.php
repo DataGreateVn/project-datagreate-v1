@@ -1,1 +1,1 @@
-<p class="text-slate-500">Chưa có nội dung cho mục này.</p>
+<p class="text-slate-500">{{ t('admin.settings.blank.no_content','Chưa có nội dung cho mục này.') }}</p>

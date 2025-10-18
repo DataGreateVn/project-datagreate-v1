@@ -18,7 +18,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AdminSeeder::class,
             SettingSeeder::class,
-            AdminUiTranslationsSeeder::class,
+            TranslationLoginSeeder::class,
+            TranslationLayoutSeeder::class,
+            TranslationAdminTranslationsSeeder::class,
         ]);
     }
 }

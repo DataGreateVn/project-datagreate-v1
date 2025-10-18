@@ -4,47 +4,39 @@
 * [
 * ['key'=>'locale', 'label'=>'Locale', 'class'=>'w-[90px] text-left'],
 * ['key'=>'namespace', 'label'=>'Namespace', 'class'=>'w-[160px] text-left'],
-* ...
 * ]
 */
 'columns' => [],
 
-/**
-* $rows: có thể là Collection hoặc LengthAwarePaginator (Laravel paginate)
-*/
+/** $rows: Collection hoặc LengthAwarePaginator */
 'rows' => [],
 
-/**
-* $rowView: view path để render từng hàng tuỳ biến (vd: 'admin.system.translations.row')
-* Nếu null: component sẽ render theo $columns (render text thuần).
-*/
+/** View path để render từng hàng tuỳ biến (vd: 'admin.system.translations.row') */
 'rowView' => null,
 
-/**
-* Text khi rỗng
-*/
-'empty' => 'Không có dữ liệu',
+/** Text khi rỗng */
+'empty' => null,
 
-/**
-* Bật/ tắt zebra row
-*/
+/** Bật/ tắt zebra row */
 'striped' => true,
 
-/**
-* Sticky header
-*/
+/** Sticky header */
 'stickyHeader' => true,
 
-/**
-* Số trang hiển thị (window) trong pagination đơn giản
-*/
+/** Số trang hiển thị (window) trong pagination đơn giản */
 'pageWindow' => 5,
 ])
 
 @php
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-// Đảm bảo cấu trúc $columns tối thiểu
+/* ====== I18N defaults (dùng t() có fallback) ====== */
+$emptyText = $empty ?? t('admin.shared.table.empty', 'Không có dữ liệu');
+$ariaPrev = t('admin.shared.table.prev', 'Trang trước');
+$ariaNext = t('admin.shared.table.next', 'Trang sau');
+$sumFmt = t('admin.shared.table.summary', 'Từ :from đến :to trên :total');
+
+/* ====== Chuẩn hoá $columns ====== */
 $columns = collect($columns)->map(function($col, $i){
 if (is_string($col)) $col = ['key'=>$col, 'label'=>$col];
 $col['label'] = $col['label'] ?? ($col['key'] ?? "col_$i");
@@ -54,7 +46,7 @@ return $col;
 
 $isPaginator = $rows instanceof LengthAwarePaginator;
 
-// Pagination window
+/* ====== Pagination window ====== */
 $currentPage = $isPaginator ? $rows->currentPage() : 1;
 $lastPage = $isPaginator ? $rows->lastPage() : 1;
 $half = (int) floor($pageWindow / 2);
@@ -92,7 +84,7 @@ if ($end - $start + 1 < $pageWindow) {
             @empty
             <tr>
                 <td colspan="{{ count($columns) }}" class="px-4 py-10 text-center text-slate-500 text-sm">
-                    {{ $empty }}
+                    {{ $emptyText }}
                 </td>
             </tr>
             @endforelse
@@ -105,33 +97,42 @@ if ($end - $start + 1 < $pageWindow) {
         <div class="flex flex-wrap items-center gap-1">
             {{-- Prev --}}
             @if ($rows->onFirstPage())
-            <span class="px-2.5 py-1 rounded-md border border-slate-300 bg-slate-100 text-slate-400">‹</span>
+            <span class="px-2.5 py-1 rounded-md border border-slate-300 bg-slate-100 text-slate-400" aria-disabled="true" aria-label="{{ $ariaPrev }}">‹</span>
             @else
             <a href="{{ $rows->previousPageUrl() }}"
-                class="px-2.5 py-1 rounded-md border border-[#ff8a00]/40 text-[#ff8a00] hover:bg-[#ff8a00] hover:text-white">‹</a>
+                class="px-2.5 py-1 rounded-md border border-[#ff8a00]/40 text-[#ff8a00] hover:bg-[#ff8a00] hover:text-white"
+                aria-label="{{ $ariaPrev }}">‹</a>
             @endif
 
             {{-- Numbers --}}
             @for ($i = $start; $i <= $end; $i++)
                 @if ($i==$currentPage)
-                <span class="px-2.5 py-1 rounded-md border border-[#ff8a00] bg-[#ff8a00] text-white font-semibold">{{ $i }}</span>
+                <span class="px-2.5 py-1 rounded-md border border-[#ff8a00] bg-[#ff8a00] text-white font-semibold" aria-current="page">{{ $i }}</span>
                 @else
                 <a href="{{ $rows->url($i) }}"
-                    class="px-2.5 py-1 rounded-md border border-[#ff8a00]/40 text-[#ff8a00] hover:bg-[#ff8a00] hover:text-white">{{ $i }}</a>
+                    class="px-2.5 py-1 rounded-md border border-[#ff8a00]/40 text-[#ff8a00] hover:bg-[#ff8a00] hover:text-white"
+                    aria-label="{{ t('admin.shared.table.goto_page', 'Tới trang :n', ['n'=>$i]) }}">{{ $i }}</a>
                 @endif
                 @endfor
 
                 {{-- Next --}}
                 @if ($rows->hasMorePages())
                 <a href="{{ $rows->nextPageUrl() }}"
-                    class="px-2.5 py-1 rounded-md border border-[#ff8a00]/40 text-[#ff8a00] hover:bg-[#ff8a00] hover:text-white">›</a>
+                    class="px-2.5 py-1 rounded-md border border-[#ff8a00]/40 text-[#ff8a00] hover:bg-[#ff8a00] hover:text-white"
+                    aria-label="{{ $ariaNext }}">›</a>
                 @else
-                <span class="px-2.5 py-1 rounded-md border border-slate-300 bg-slate-100 text-slate-400">›</span>
+                <span class="px-2.5 py-1 rounded-md border border-slate-300 bg-slate-100 text-slate-400" aria-disabled="true" aria-label="{{ $ariaNext }}">›</span>
                 @endif
         </div>
 
         <div>
-            Từ {{ $rows->firstItem() ?? 0 }} đến {{ $rows->lastItem() ?? 0 }} trên {{ $rows->total() }}
+            @php
+            $from = $rows->firstItem() ?? 0;
+            $to = $rows->lastItem() ?? 0;
+            $total = $rows->total();
+            $summary = strtr($sumFmt, [':from'=>$from, ':to'=>$to, ':total'=>$total]);
+            @endphp
+            {{ $summary }}
         </div>
     </div>
     @endif
