@@ -26,9 +26,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth'  => \App\Http\Middleware\Authenticate::class,
             'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
             // (tuỳ chọn) Spatie Permission:
-            'role'       => \Spatie\Permission\Middlewares\RoleMiddleware::class,
-            'permission' => \Spatie\Permission\Middlewares\PermissionMiddleware::class,
-            'roles_or_permissions' => \Spatie\Permission\Middlewares\RoleOrPermissionMiddleware::class,
+            'role'               => \Spatie\Permission\Middlewares\RoleMiddleware::class,
+            'permission'         => \Spatie\Permission\Middlewares\PermissionMiddleware::class,
+            'role_or_permission' => \Spatie\Permission\Middlewares\RoleOrPermissionMiddleware::class,
         ]);
 
         // ✅ Thêm SetLocale vào NHÓM web (chạy cho tất cả route web + /admin)

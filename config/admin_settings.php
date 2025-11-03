@@ -1,12 +1,19 @@
 <?php
-// config/admin_settings_groups.php (hoặc nơi bạn đang trả ra mảng này)
+// config/admin_settings_groups.php
 return [
     'default' => 'general',
 
+    // map slug => permission
+    'permissions_map' => [
+        // mặc định cho các mục settings
+        '*'             => 'manage-settings',
+        // mục đặc thù
+        'translations'  => 'manage-translations',
+    ],
+
     'groups' => [
         [
-            // dùng key dịch thay vì text
-            'label_key' => 'admin.settings.group.info', // 'Cài đặt thông tin'
+            'label_key' => 'admin.settings.group.info',
             'items' => [
                 ['slug' => 'general',   'label_key' => 'admin.settings.sidebar.general'],
                 ['slug' => 'meta',      'label_key' => 'admin.settings.sidebar.meta'],
@@ -16,14 +23,14 @@ return [
             ],
         ],
         [
-            'label_key' => 'admin.settings.group.email', // 'Email'
+            'label_key' => 'admin.settings.group.email',
             'items' => [
                 ['slug' => 'smtp',          'label_key' => 'admin.settings.sidebar.smtp'],
                 ['slug' => 'notifications', 'label_key' => 'admin.settings.sidebar.notifications'],
             ],
         ],
         [
-            'label_key' => 'admin.settings.group.content', // 'Nội dung'
+            'label_key' => 'admin.settings.group.content',
             'items' => [
                 ['slug' => 'translations', 'label_key' => 'admin.settings.sidebar.translations'],
             ],

@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -16,5 +17,14 @@ class AuthServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void {}
+    public function boot(): void
+    {
+        Gate::before(function ($user, $ability) {
+            // chỉ áp dụng cho guard admin
+            if (method_exists($user, 'hasRole') && $user->hasRole('super-admin')) {
+                return true;
+            }
+            return null;
+        });
+    }
 }

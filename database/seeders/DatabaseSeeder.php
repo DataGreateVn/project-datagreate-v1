@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             TranslationLoginSeeder::class,
             TranslationLayoutSeeder::class,
             TranslationAdminTranslationsSeeder::class,
+            RbacSeeder::class,
         ]);
     }
 }
