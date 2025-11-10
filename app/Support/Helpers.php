@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Cache;
 use App\Models\Translation;
 use App\Models\Setting;
+use Illuminate\Support\Facades\File;
 
 if (! function_exists('setting')) {
     function setting(?string $key, $default = null)
@@ -56,5 +57,18 @@ if (! function_exists('t')) {
         }
 
         return $text;
+    }
+}
+
+if (! function_exists('admin_menu_items')) {
+    function admin_menu_items(): array
+    {
+        $path = config_path('admin_menu.json');
+        if (! File::exists($path)) {
+            return [];
+        }
+        $json = File::get($path);
+        $items = json_decode($json, true);
+        return is_array($items) ? $items : [];
     }
 }

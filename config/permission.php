@@ -1,13 +1,9 @@
 <?php
 
 return [
-    // ...
-    'default_guard' => 'admin',
-
-    'guards' => [
-        'admin', // dùng cùng với auth:admin
+    'defaults' => [
+        'guard' => 'admin',    // dùng guard admin cho hệ thống RBAC của bạn
     ],
-
     // nếu bạn dùng cache file/database (không tagging) vẫn OK
     'cache' => [
         'expiration_time' => \DateInterval::createFromDateString('24 hours'),

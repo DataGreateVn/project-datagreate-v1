@@ -1,0 +1,23 @@
+[
+    {
+        "label_key": "admin.layout.menu_dashboard",
+        "label": "Dashboard",
+        "icon": "heroicon-o-home",
+        "route": "admin.dashboard",
+        "permission": "view-dashboard"
+    },
+    {
+        "label_key": "admin.layout.menu_settings",
+        "label": "Settings",
+        "icon": "heroicon-o-wrench-screwdriver",
+        "route": "admin.settings.index",
+        "permission": "manage-settings"
+    },
+    {
+        "label_key": "admin.layout.menu_translations",
+        "label": "Translations",
+        "icon": "heroicon-o-document-text",
+        "route": "admin.translations.index",
+        "permission": "manage-translations"
+    }
+]

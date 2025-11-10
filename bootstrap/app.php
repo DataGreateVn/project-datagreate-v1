@@ -8,7 +8,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         using: function () {
-            // Nạp ADMIN TRƯỚC để không bị wildcard của web “nuốt”
+            // 🚩 Nạp ROUTES ADMIN TRƯỚC để không bị web “nuốt”
             if (file_exists(base_path('routes/admin.php'))) {
                 Route::middleware('web')
                     ->prefix('admin')->name('admin.')
@@ -21,23 +21,46 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Đăng ký alias (cái bạn đang có)
+        /**
+         * ===== Aliases cơ bản =====
+         */
         $middleware->alias([
             'auth'  => \App\Http\Middleware\Authenticate::class,
             'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
-            // (tuỳ chọn) Spatie Permission:
-            'role'               => \Spatie\Permission\Middlewares\RoleMiddleware::class,
-            'permission'         => \Spatie\Permission\Middlewares\PermissionMiddleware::class,
-            'role_or_permission' => \Spatie\Permission\Middlewares\RoleOrPermissionMiddleware::class,
         ]);
 
-        // ✅ Thêm SetLocale vào NHÓM web (chạy cho tất cả route web + /admin)
+        /**
+         * ===== Spatie\Permission middlewares =====
+         *  Một số phiên bản dùng namespace "Middlewares", một số dùng "Middleware".
+         *  Đoạn dưới tự phát hiện để alias chính xác, tránh lỗi:
+         *  Target class [Spatie\Permission\Middlewares\PermissionMiddleware] does not exist.
+         */
+        $nsPlural   = '\Spatie\Permission\Middlewares';
+        $nsSingular = '\Spatie\Permission\Middleware';
+
+        $usingNs = null;
+        if (class_exists($nsPlural . '\PermissionMiddleware')) {
+            $usingNs = $nsPlural;
+        } elseif (class_exists($nsSingular . '\PermissionMiddleware')) {
+            $usingNs = $nsSingular;
+        }
+
+        if ($usingNs) {
+            $middleware->alias([
+                'role'               => $usingNs . '\RoleMiddleware',
+                'permission'         => $usingNs . '\PermissionMiddleware',
+                'role_or_permission' => $usingNs . '\RoleOrPermissionMiddleware',
+            ]);
+        }
+
+        /**
+         * ===== Locale middleware cho tất cả routes web (kể cả /admin) =====
+         */
         $middleware->appendToGroup('web', [
             \App\Http\Middleware\SetLocale::class,
         ]);
-
-        // (Nếu muốn chạy cho tất cả request, kể cả api) dùng:
-        // $middleware->use([\App\Http\Middleware\SetLocale::class]);
     })
-    ->withExceptions(function (Exceptions $exceptions) {})
+    ->withExceptions(function (Exceptions $exceptions) {
+        //
+    })
     ->create();

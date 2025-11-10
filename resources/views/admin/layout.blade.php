@@ -59,24 +59,44 @@
     </a>
 
     @php
-    // ======= Brand + Flag helpers =======
+    // ======= Helpers / Context =======
     use App\Models\Setting;
+    use Illuminate\Support\Str;
 
+    // Brand
     $brandName = Setting::getVal('site_name', 'Data Greate VN');
     $brandParts = preg_split('/\s+/', $brandName, 2);
     $logoPath = Setting::getVal('site_logo', '');
-    $brandInitial= mb_strtoupper(mb_substr($brandName, 0, 1, 'UTF-8'));
+    $brandInit = mb_strtoupper(mb_substr($brandName, 0, 1, 'UTF-8'));
     $logoExists = $logoPath && file_exists(public_path($logoPath));
 
+    // Locale + Flag
     $current = app_locale();
     $current = in_array($current, ['vi','en']) ? $current : 'vi';
-    $langLabel = $current === 'en'
-    ? t('admin.layout.lang_english','English')
-    : t('admin.layout.lang_vietnamese','Tiếng Việt');
+    $langLabel = $current === 'en' ? t('admin.layout.lang_english','English') : t('admin.layout.lang_vietnamese','Tiếng Việt');
     $flagPath = $current === 'en' ? 'images/flags/en.svg' : 'images/flags/vi.svg';
-
-    // Giữ nguyên query hiện tại (trừ page/lang), thêm lang=code
     $langUrl = fn($code) => url()->current() . '?' . http_build_query(array_merge(request()->except('page','lang'), ['lang' => $code]));
+
+    // Admin user (guard: admin)
+    $admin = auth('admin')->user();
+    $displayName = $admin?->name ?: t('admin.layout.user_display_name','Admin');
+    $displayInit = mb_strtoupper(mb_substr($displayName, 0, 1, 'UTF-8'));
+
+    // Menu từ helper (mỗi item: label_key?, label?, icon?, route, permission?)
+    $menus = admin_menu_items();
+
+    // Resolve icon: giữ đúng Heroicons nếu truyền heroicon-o-*, còn lại tự thêm prefix heroicon-o-
+    $iconComponent = function (?string $icon) {
+    if (!$icon) return 'heroicon-o-square-2-stack';
+    if (Str::startsWith($icon, 'heroicon-')) return $icon;
+    return 'heroicon-o-' . Str::slug($icon, '-');
+    };
+
+    // Active route checker hỗ trợ 'index' => '.*'
+    $isActive = function (string $routeName) {
+    return request()->routeIs($routeName)
+    || (Str::endsWith($routeName, '.index') && request()->routeIs(Str::replaceLast('.index', '.*', $routeName)));
+    };
     @endphp
 
     <div class="min-h-screen flex">
@@ -86,8 +106,8 @@
         {{-- ========== SIDEBAR ========== --}}
         <aside
             class="fixed inset-y-0 left-0 z-40 w-72 max-w-[80vw] bg-[#0f0f0f] text-white flex flex-col
-                   -translate-x-full peer-checked:translate-x-0 transition-transform duration-200
-                   md:static md:translate-x-0 md:w-64">
+               -translate-x-full peer-checked:translate-x-0 transition-transform duration-200
+               md:static md:translate-x-0 md:w-64">
 
             {{-- Brand --}}
             <div class="px-4 pt-5 pb-3 border-b border-white/10 shrink-0">
@@ -96,7 +116,7 @@
                     <img src="{{ asset($logoPath) }}" class="h-10 w-auto" alt="logo">
                     @else
                     <div class="flex items-center justify-center w-10 h-10 rounded-full bg-[#ff8a00] text-black text-lg font-bold shadow-md">
-                        {{ $brandInitial }}
+                        {{ $brandInit }}
                     </div>
                     @endif
                     <div class="font-semibold leading-tight">
@@ -106,41 +126,46 @@
                 </div>
             </div>
 
-            {{-- Menu --}}
-            @php
-            function mActive($pattern) {
-            return request()->routeIs($pattern)
-            ? 'nav-item active bg-[#ff8a00]/20 text-[#ff8a00]'
-            : 'text-white/80 hover:text-white hover:bg-white/10';
-            }
-            function ariaActive($pattern) {
-            return request()->routeIs($pattern) ? 'aria-current=page' : '';
-            }
-            @endphp
-
+            {{-- Menu (dynamic + permission) --}}
             <nav class="flex-1 overflow-y-auto thin-scrollbar px-2 py-3 space-y-1 text-[15px]">
-                <a href="{{ route('admin.dashboard') }}"
-                    class="flex items-center gap-3 px-3 py-2 rounded outline-none focus:ring-2 focus:ring-[#ff8a00] {{ mActive('admin.dashboard') }}"
-                    {{ ariaActive('admin.dashboard') }}>
-                    <x-heroicon-o-home class="w-5 h-5" />
-                    <span class="truncate">{{ t('admin.layout.menu_dashboard','Dashboard') }}</span>
-                </a>
+                @foreach ($menus as $item)
+                @php
+                $routeName = $item['route'] ?? null;
+                if (!$routeName) continue;
 
-                <div class="border-t border-white/10 my-2"></div>
+                $active = $isActive($routeName);
+                $classes = $active
+                ? 'nav-item active bg-[#ff8a00]/20 text-[#ff8a00]'
+                : 'text-white/80 hover:text-white hover:bg-white/10';
 
-                <a href="{{ route('admin.settings.index') }}"
-                    class="flex items-center gap-3 px-3 py-2 rounded outline-none focus:ring-2 focus:ring-[#ff8a00] {{ mActive('admin.settings.*') }}"
-                    {{ ariaActive('admin.settings.*') }}>
-                    <x-heroicon-o-wrench-screwdriver class="w-5 h-5" />
-                    <span class="truncate">{{ t('admin.layout.menu_settings','Settings') }}</span>
-                </a>
+                $label = $item['label'] ?? '';
+                // ưu tiên label_key, fallback sang key chuẩn admin.layout.menu_{slug}
+                $computedLabel = isset($item['label_key'])
+                ? t($item['label_key'], $label)
+                : t('admin.layout.menu_'.Str::slug($label,'_'), $label);
 
-                <a href="{{ route('admin.translations.index') }}"
-                    class="flex items-center gap-3 px-3 py-2 rounded outline-none focus:ring-2 focus:ring-[#ff8a00] {{ mActive('admin.translations.*') }}"
-                    {{ ariaActive('admin.translations.*') }}>
-                    <x-heroicon-o-document-text class="w-5 h-5" />
-                    <span class="truncate">{{ t('admin.layout.menu_translations','Translations') }}</span>
+                $icon = $iconComponent($item['icon'] ?? null);
+                $needPermission = $item['permission'] ?? null;
+                @endphp
+
+                @if ($needPermission)
+                @can($needPermission)
+                <a href="{{ route($routeName) }}"
+                    class="flex items-center gap-3 px-3 py-2 rounded outline-none focus:ring-2 focus:ring-[#ff8a00] {{ $classes }}"
+                    aria-current="{{ $active ? 'page' : 'false' }}">
+                    <x-dynamic-component :component="$icon" class="w-5 h-5" />
+                    <span class="truncate">{{ $computedLabel }}</span>
                 </a>
+                @endcan
+                @else
+                <a href="{{ route($routeName) }}"
+                    class="flex items-center gap-3 px-3 py-2 rounded outline-none focus:ring-2 focus:ring-[#ff8a00] {{ $classes }}"
+                    aria-current="{{ $active ? 'page' : 'false' }}">
+                    <x-dynamic-component :component="$icon" class="w-5 h-5" />
+                    <span class="truncate">{{ $computedLabel }}</span>
+                </a>
+                @endif
+                @endforeach
             </nav>
 
             {{-- Footer cố định + logout --}}
@@ -148,13 +173,13 @@
                 <div class="flex items-center justify-between px-4 py-3 text-white/90">
                     <div class="flex items-center gap-3 min-w-0">
                         <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-[#f4a90a] text-black text-sm font-bold shadow-md">
-                            {{ t('admin.layout.user_avatar_initial','A') }}
+                            {{ $displayInit }}
                         </span>
                         <div class="text-[15px] leading-tight min-w-0">
                             <div class="text-white font-semibold truncate">
-                                {{ t('admin.layout.user_display_name','Admin') }}
+                                {{ $displayName }}
                             </div>
-                            <a href=""
+                            <a href="#"
                                 class="text-sm text-[#ffb000] hover:text-[#ffd67a] hover:underline font-medium transition">
                                 {{ t('admin.layout.change_password','Đổi mật khẩu') }}
                             </a>
@@ -176,7 +201,7 @@
         {{-- Backdrop mobile --}}
         <label for="nav-open"
             class="fixed inset-0 z-30 bg-black/40 opacity-0 pointer-events-none transition
-                   md:hidden peer-checked:opacity-100 peer-checked:pointer-events-auto"></label>
+                  md:hidden peer-checked:opacity-100 peer-checked:pointer-events-auto"></label>
 
         {{-- ========== MAIN ========== --}}
         <div class="flex-1 flex flex-col min-w-0">
@@ -196,6 +221,7 @@
                             </svg>
                         </label>
                         <div class="min-w-0 flex-1">
+                            {{-- Fallback tránh lỗi $breadcrumbs undefined --}}
                             <x-admin::breadcrumb :items="$breadcrumbs ?? \App\Support\Breadcrumbs::make()" />
                         </div>
                     </div>
